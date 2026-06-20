@@ -1,100 +1,118 @@
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import PriceSummary from '../components/PriceSummary';
 
 export default function BookingSummary() {
   const navigate = useNavigate();
   const { selectedSeats, selectedDate, selectedTime, selectedTheatre, selectedShowtime, seatPrice, totalPrice } = useSelector((s) => s.booking);
-  const { selectedMovie, selectedFormat } = useSelector((s) => s.movies);
+  const { selectedMovie } = useSelector((s) => s.movies);
 
-  const BOOKING_FEE = 30;
+  const BOOKING_FEE = 20;
   const baseTotal = selectedSeats.length * seatPrice;
 
   if (!selectedMovie || selectedSeats.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen px-6 text-center">
+      <div className="flex flex-col items-center justify-center min-h-screen bg-white px-6 text-center">
         <p className="text-5xl mb-4">🎬</p>
-        <p className="text-white font-bold text-lg mb-2">Nothing to summarize</p>
-        <p className="text-white/50 text-sm mb-6">Select a movie and seats first</p>
-        <button onClick={() => navigate('/')} className="gradient-purple px-6 py-3 rounded-2xl text-white font-bold">
+        <p className="text-gray-900 font-extrabold text-lg mb-1">Nothing to summarize</p>
+        <p className="text-gray-400 text-xs mb-6">Select a movie and seats first</p>
+        <button onClick={() => navigate('/')} className="gradient-purple px-6 py-3 rounded-2xl text-white font-bold text-xs">
           Browse Movies
         </button>
       </div>
     );
   }
 
-  const dateStr = selectedDate ? new Date(selectedDate).toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' }) : '—';
+  const dateStr = selectedDate
+    ? new Date(selectedDate).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
+    : '—';
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="bg-white min-h-screen pb-40">
       {/* Header */}
-      <div className="px-4 pt-5 pb-3 flex items-center gap-3">
-        <button onClick={() => navigate(-1)} className="w-9 h-9 glass rounded-full flex items-center justify-center">
-          <BackIcon />
-        </button>
-        <h1 className="text-white font-bold text-lg">Booking Summary</h1>
+      <div className="px-5 pt-5 pb-3">
+        <div className="flex justify-between items-center text-sm font-bold text-gray-800">
+          <button onClick={() => navigate(-1)} className="flex items-center gap-1 hover:text-purple text-gray-500">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="m15 18-6-6 6-6" />
+            </svg>
+            Back
+          </button>
+          <button onClick={() => navigate('/')} className="text-gray-400 hover:text-red-500">Cancel</button>
+        </div>
+        <div className="mt-4">
+          <h1 className="text-gray-900 font-extrabold text-lg">Booking Summary</h1>
+        </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-4 pb-4">
-        {/* Movie card */}
-        <div className="glass rounded-2xl overflow-hidden mb-4 fade-up">
-          <div className="flex gap-3 p-4">
-            {selectedMovie.poster && (
-              <img src={selectedMovie.poster} alt={selectedMovie.title} className="w-20 h-28 object-cover rounded-xl flex-shrink-0" />
+      {/* Progress Bar (Step 4 / 4) */}
+      <div className="px-5 mb-5">
+        <div className="h-1 bg-gray-100 rounded-full w-full overflow-hidden">
+          <div className="h-full bg-purple rounded-full" style={{ width: '92%' }} />
+        </div>
+      </div>
+
+      {/* Card Details */}
+      <div className="px-5">
+        <div className="bg-white border border-gray-100 rounded-3xl p-5 shadow-sm mb-5">
+          {/* Movie Poster & Title */}
+          <div className="flex gap-4">
+            {selectedMovie.poster ? (
+              <img
+                src={selectedMovie.poster}
+                alt={selectedMovie.title}
+                className="w-20 aspect-[2/3] object-cover rounded-2xl border border-gray-100 flex-shrink-0"
+              />
+            ) : (
+              <div className="w-20 aspect-[2/3] bg-gray-100 rounded-2xl" />
             )}
-            <div className="flex flex-col justify-between py-1">
+            <div className="flex flex-col justify-between py-0.5">
               <div>
-                <h2 className="text-white font-bold text-base leading-tight">{selectedMovie.title}</h2>
-                <div className="flex gap-1.5 mt-1.5 flex-wrap">
-                  {selectedMovie.genres?.slice(0, 2).map((g) => (
-                    <span key={g} className="text-[9px] bg-purple/20 text-purple px-2 py-0.5 rounded-full">{g}</span>
-                  ))}
-                  <span className="text-[9px] bg-white/10 text-white/60 px-2 py-0.5 rounded-full">{selectedFormat}</span>
-                </div>
+                <h2 className="text-gray-900 font-extrabold text-base leading-tight">{selectedMovie.title}</h2>
+                <p className="text-gray-400 text-xs mt-1 font-semibold">{selectedMovie.genres?.join(', ')}</p>
               </div>
-              <div className="flex items-center gap-1 mt-2">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="#FBBF24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                <span className="text-yellow-400 text-xs font-semibold">{selectedMovie.rating}</span>
+              <div className="flex items-center gap-1 text-gray-800">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="#FBBF24">
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                </svg>
+                <span className="text-xs font-black">{selectedMovie.rating || '8.1'}</span>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Booking details */}
-        <div className="glass rounded-2xl p-4 mb-4 fade-up">
-          <h3 className="text-white font-semibold text-sm mb-3">Booking Details</h3>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="h-px bg-gray-100 my-4" />
+
+          {/* Details Row */}
+          <div className="grid grid-cols-2 gap-y-4 gap-x-2">
+            <Detail label="Theatre" value={selectedTheatre?.name || '—'} />
             <Detail label="Date" value={dateStr} />
             <Detail label="Time" value={selectedTime || '—'} />
-            <Detail label="Theatre" value={selectedTheatre?.name || '—'} />
-            <Detail label="Screen" value={`Screen ${selectedShowtime?.screen || '—'}`} />
-            <Detail label="Format" value={selectedFormat} />
             <Detail label="Seats" value={selectedSeats.map((s) => `${s.row}${s.col}`).join(', ')} />
           </div>
         </div>
 
-        {/* Price breakdown */}
-        <div className="glass rounded-2xl p-4 mb-4 fade-up">
-          <h3 className="text-white font-semibold text-sm mb-3">Price Breakdown</h3>
-          <div className="space-y-2">
-            <PriceRow label={`${selectedSeats.length} Seat${selectedSeats.length > 1 ? 's' : ''} × ₹${seatPrice}`} value={`₹${baseTotal}`} />
+        {/* Pricing Summary */}
+        <div className="bg-white border border-gray-100 rounded-3xl p-5 shadow-sm">
+          <h3 className="text-gray-800 font-extrabold text-xs uppercase tracking-wide mb-3">Receipt Details</h3>
+          <div className="space-y-3">
+            <PriceRow label={`${selectedSeats.length}x Tickets`} value={`₹${baseTotal}`} />
             <PriceRow label="Booking Fee" value={`₹${BOOKING_FEE}`} />
-            <div className="border-t border-white/10 pt-2 mt-2 flex justify-between items-center">
-              <span className="text-white font-bold">Total</span>
-              <span className="text-purple text-xl font-black">₹{totalPrice}</span>
+            <div className="h-px bg-gray-100 my-2" />
+            <div className="flex justify-between items-center font-bold text-sm">
+              <span className="text-gray-900 font-black">Total</span>
+              <span className="text-purple text-base font-black">₹{totalPrice}</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* CTA */}
-      <div className="p-4 border-t border-white/10">
+      {/* Sticky Bottom button above nav */}
+      <div className="fixed bottom-16 left-1/2 -translate-x-1/2 w-full max-w-[390px] p-4 bg-white border-t border-gray-100">
         <button
           id="proceed-to-payment"
           onClick={() => navigate('/payment')}
-          className="w-full gradient-purple py-4 rounded-2xl text-white font-bold text-base pulse-glow active:scale-95 transition-transform"
+          className="w-full gradient-purple py-3.5 rounded-2xl text-white font-extrabold text-sm shadow-[0_4px_16px_rgba(95,51,225,0.25)] transition-transform active:scale-95 text-center"
         >
-          Proceed to Pay ₹{totalPrice}
+          Proceed to Payment
         </button>
       </div>
     </div>
@@ -104,25 +122,17 @@ export default function BookingSummary() {
 function Detail({ label, value }) {
   return (
     <div>
-      <p className="text-[10px] text-white/40 uppercase tracking-wide">{label}</p>
-      <p className="text-sm text-white font-semibold">{value}</p>
+      <p className="text-[10px] text-gray-400 uppercase font-bold tracking-wide">{label}</p>
+      <p className="text-xs text-gray-800 font-extrabold mt-0.5">{value}</p>
     </div>
   );
 }
 
 function PriceRow({ label, value }) {
   return (
-    <div className="flex justify-between text-sm">
-      <span className="text-white/60">{label}</span>
-      <span className="text-white">{value}</span>
+    <div className="flex justify-between text-xs font-semibold text-gray-500">
+      <span>{label}</span>
+      <span className="text-gray-800 font-bold">{value}</span>
     </div>
-  );
-}
-
-function BackIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
-      <path d="M19 12H5M12 19l-7-7 7-7" />
-    </svg>
   );
 }

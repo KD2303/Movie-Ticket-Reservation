@@ -4,17 +4,17 @@ export default {
   theme: {
     extend: {
       colors: {
-        bg: '#0D0D0D',
-        surface: '#1A1A1A',
-        card: '#222222',
+        bg: '#F9FAFB',
+        surface: '#FFFFFF',
+        card: '#FFFFFF',
         purple: {
-          DEFAULT: '#7B61FF',
-          light: '#9B85FF',
-          dark: '#5B41DF',
+          DEFAULT: '#5F33E1',
+          light: '#EEF2FF',
+          dark: '#4F46E5',
         },
-        occupied: '#9E9E9E',
+        occupied: '#D1D5DB',
         available: 'transparent',
-        selected: '#7B61FF',
+        selected: '#5F33E1',
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],

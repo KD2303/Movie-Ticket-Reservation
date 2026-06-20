@@ -4,17 +4,18 @@ import { useDispatch, useSelector } from 'react-redux';
 import { createBooking } from '../services/api';
 import { clearBooking } from '../store/bookingSlice';
 
-const PAYMENT_METHODS = ['Credit / Debit Card', 'UPI', 'Net Banking', 'Wallet'];
-
 export default function Payment() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { selectedSeats, selectedShowtime, totalPrice } = useSelector((s) => s.booking);
+  const { selectedSeats, selectedShowtime, totalPrice, seatPrice } = useSelector((s) => s.booking);
   const { selectedMovie } = useSelector((s) => s.movies);
 
-  const [method, setMethod] = useState('Credit / Debit Card');
+  const BOOKING_FEE = 20;
+  const baseTotal = selectedSeats.length * seatPrice;
+
+  const [paymentMethod, setPaymentMethod] = useState('card'); // 'card' or 'wallet'
   const [card, setCard] = useState({ number: '', expiry: '', cvv: '', name: '' });
-  const [upi, setUpi] = useState('');
+  const [saveDetails, setSaveDetails] = useState(false);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
@@ -31,7 +32,7 @@ export default function Payment() {
       });
       setSuccess(true);
       dispatch(clearBooking());
-      setTimeout(() => navigate('/bookings'), 2500);
+      setTimeout(() => navigate('/bookings'), 2000);
     } catch (err) {
       setError(err.response?.data?.message || 'Payment failed. Please try again.');
     } finally {
@@ -41,85 +42,114 @@ export default function Payment() {
 
   if (success) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center px-6 text-center">
+      <div className="bg-white min-h-screen flex flex-col items-center justify-center px-6 text-center">
         <div className="scale-in">
-          <div className="w-24 h-24 rounded-full gradient-purple flex items-center justify-center mx-auto mb-6 pulse-glow">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
-              <path d="M20 6L9 17l-5-5" />
+          <div className="w-20 h-20 rounded-full gradient-purple flex items-center justify-center mx-auto mb-6 shadow-lg shadow-purple/20">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="20 6 9 17 4 12" />
             </svg>
           </div>
-          <h2 className="text-white font-black text-2xl mb-2">Booking Confirmed!</h2>
-          <p className="text-white/50 text-sm mb-2">Your tickets have been booked successfully</p>
-          <p className="text-purple text-sm font-semibold">Redirecting to your bookings…</p>
+          <h2 className="text-gray-900 font-extrabold text-xl mb-1">Payment Successful!</h2>
+          <p className="text-gray-400 text-xs mb-3">Your tickets have been reserved</p>
+          <p className="text-purple text-xs font-bold animate-pulse">Redirecting to My Tickets…</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="bg-white min-h-screen pb-40">
       {/* Header */}
-      <div className="px-4 pt-5 pb-3 flex items-center gap-3">
-        <button onClick={() => navigate(-1)} className="w-9 h-9 glass rounded-full flex items-center justify-center">
-          <BackIcon />
-        </button>
-        <h1 className="text-white font-bold text-lg">Payment</h1>
+      <div className="px-5 pt-5 pb-3">
+        <div className="flex justify-between items-center text-sm font-bold text-gray-800">
+          <button onClick={() => navigate(-1)} className="flex items-center gap-1 hover:text-purple text-gray-500">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="m15 18-6-6 6-6" />
+            </svg>
+            Back
+          </button>
+          <button onClick={() => navigate('/')} className="text-gray-400 hover:text-red-500">Cancel</button>
+        </div>
+        <div className="mt-4">
+          <h1 className="text-gray-900 font-extrabold text-lg">Checkout</h1>
+        </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-4 pb-4">
-        {/* Order summary */}
-        <div className="glass rounded-2xl p-4 mb-4 fade-up">
-          <div className="flex justify-between items-center">
-            <div>
-              <p className="text-white font-semibold text-sm">{selectedMovie?.title || 'Movie'}</p>
-              <p className="text-white/40 text-xs mt-0.5">{selectedSeats.length} seat{selectedSeats.length > 1 ? 's' : ''} · {selectedSeats.map((s) => `${s.row}${s.col}`).join(', ')}</p>
+      {/* Progress Bar (Step 4 / 4 Complete) */}
+      <div className="px-5 mb-5">
+        <div className="h-1 bg-gray-100 rounded-full w-full overflow-hidden">
+          <div className="h-full bg-purple rounded-full" style={{ width: '99%' }} />
+        </div>
+      </div>
+
+      <div className="px-5 flex flex-col gap-5">
+        {/* Receipt / Summary Details */}
+        <div className="bg-white border border-gray-100 rounded-3xl p-5 shadow-sm">
+          <p className="text-gray-800 font-extrabold text-xs uppercase tracking-wide mb-3">Summary</p>
+          <div className="space-y-2 text-xs font-semibold text-gray-500">
+            <div className="flex justify-between">
+              <span>{selectedSeats.length}x Tickets</span>
+              <span className="text-gray-800 font-bold">₹{baseTotal}</span>
             </div>
-            <p className="text-purple font-black text-xl">₹{totalPrice}</p>
+            <div className="flex justify-between">
+              <span>Booking Fee</span>
+              <span className="text-gray-800 font-bold">₹{BOOKING_FEE}</span>
+            </div>
+            <div className="h-px bg-gray-100 my-2" />
+            <div className="flex justify-between items-center font-bold text-sm">
+              <span className="text-gray-900 font-black">Total</span>
+              <span className="text-purple text-base font-black">₹{totalPrice}</span>
+            </div>
           </div>
         </div>
 
-        {/* Payment method selector */}
-        <div className="glass rounded-2xl p-4 mb-4 fade-up">
-          <h3 className="text-white font-semibold text-sm mb-3">Payment Method</h3>
-          <div className="grid grid-cols-2 gap-2">
-            {PAYMENT_METHODS.map((m) => (
-              <button
-                key={m}
-                id={`pay-method-${m.replace(/\s+/g, '-')}`}
-                onClick={() => setMethod(m)}
-                className={`py-2.5 px-3 rounded-xl text-xs font-medium transition-all border ${
-                  method === m ? 'gradient-purple text-white border-transparent' : 'border-white/20 text-white/60 hover:border-purple/40'
-                }`}
-              >
-                {m}
-              </button>
-            ))}
+        {/* Choose Payment Method */}
+        <div>
+          <p className="text-gray-800 font-extrabold text-xs uppercase tracking-wide mb-3">Choose payment method</p>
+          <div className="flex gap-4 items-center mb-4">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="paymentMethod"
+                checked={paymentMethod === 'card'}
+                onChange={() => setPaymentMethod('card')}
+                className="w-4 h-4 text-purple focus:ring-purple border-gray-300"
+              />
+              <span className="text-xs font-bold text-gray-800">Credit/Debit Card</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="paymentMethod"
+                checked={paymentMethod === 'wallet'}
+                onChange={() => setPaymentMethod('wallet')}
+                className="w-4 h-4 text-purple focus:ring-purple border-gray-300"
+              />
+              <span className="text-xs font-bold text-gray-800">Mobile Wallet</span>
+            </label>
           </div>
-        </div>
 
-        {/* Form fields */}
-        {method === 'Credit / Debit Card' && (
-          <div className="glass rounded-2xl p-4 mb-4 fade-up">
-            <h3 className="text-white font-semibold text-sm mb-3">Card Details</h3>
-            <div className="space-y-3">
+          {/* Form fields for Card */}
+          {paymentMethod === 'card' ? (
+            <div className="flex flex-col gap-3.5">
               <Input
-                label="Card Number"
+                label="Name on card"
+                id="card-name"
+                placeholder="Name on card"
+                value={card.name}
+                onChange={(v) => setCard((c) => ({ ...c, name: v }))}
+              />
+              <Input
+                label="Card number"
                 id="card-number"
                 placeholder="1234 5678 9012 3456"
                 value={card.number}
                 onChange={(v) => setCard((c) => ({ ...c, number: v }))}
                 maxLength={19}
               />
-              <Input
-                label="Cardholder Name"
-                id="card-name"
-                placeholder="John Doe"
-                value={card.name}
-                onChange={(v) => setCard((c) => ({ ...c, name: v }))}
-              />
               <div className="grid grid-cols-2 gap-3">
                 <Input
-                  label="Expiry"
+                  label="Expiry date"
                   id="card-expiry"
                   placeholder="MM/YY"
                   value={card.expiry}
@@ -127,47 +157,58 @@ export default function Payment() {
                   maxLength={5}
                 />
                 <Input
-                  label="CVV"
+                  label="CVV/CVC"
                   id="card-cvv"
-                  placeholder="•••"
+                  placeholder="CVV"
                   value={card.cvv}
                   onChange={(v) => setCard((c) => ({ ...c, cvv: v }))}
                   maxLength={3}
                   type="password"
                 />
               </div>
+
+              {/* Save payment details */}
+              <label className="flex items-center gap-2 mt-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={saveDetails}
+                  onChange={(e) => setSaveDetails(e.target.checked)}
+                  className="w-4 h-4 text-purple rounded border-gray-300 focus:ring-purple"
+                />
+                <span className="text-[11px] font-bold text-gray-500">Save payment details for the next purchase</span>
+              </label>
             </div>
-          </div>
-        )}
-        {method === 'UPI' && (
-          <div className="glass rounded-2xl p-4 mb-4 fade-up">
-            <Input label="UPI ID" id="upi-id" placeholder="name@upi" value={upi} onChange={setUpi} />
-          </div>
-        )}
+          ) : (
+            <div className="bg-gray-50 border border-gray-100 rounded-2xl p-4 text-center text-xs text-gray-400">
+              Mobile Wallet checkout selected (Mock integration)
+            </div>
+          )}
+        </div>
 
         {error && (
-          <div className="bg-red-500/20 border border-red-400/30 rounded-xl px-4 py-3 mb-4">
-            <p className="text-red-400 text-sm">{error}</p>
+          <div className="bg-red-50 border border-red-100 rounded-xl px-4 py-3">
+            <p className="text-red-600 text-xs font-semibold">{error}</p>
           </div>
         )}
       </div>
 
-      {/* Pay CTA */}
-      <div className="p-4 border-t border-white/10">
+      {/* Sticky Bottom button above nav */}
+      <div className="fixed bottom-16 left-1/2 -translate-x-1/2 w-full max-w-[390px] p-4 bg-white border-t border-gray-100">
         <button
           id="confirm-payment"
           onClick={handlePay}
           disabled={loading}
-          className="w-full gradient-purple py-4 rounded-2xl text-white font-bold text-base pulse-glow active:scale-95 transition-all disabled:opacity-60"
+          className="w-full gradient-purple py-3.5 rounded-2xl text-white font-extrabold text-sm shadow-[0_4px_16px_rgba(95,51,225,0.25)] transition-transform active:scale-95 text-center flex items-center justify-center gap-2"
         >
           {loading ? (
-            <span className="flex items-center justify-center gap-2">
-              <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              Processing…
-            </span>
-          ) : `Pay ₹${totalPrice}`}
+            <>
+              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              <span>Processing…</span>
+            </>
+          ) : (
+            <span>Complete Payment</span>
+          )}
         </button>
-        <p className="text-center text-white/30 text-xs mt-3">🔒 Secured by 256-bit SSL encryption (mock)</p>
       </div>
     </div>
   );
@@ -176,7 +217,7 @@ export default function Payment() {
 function Input({ label, id, placeholder, value, onChange, maxLength, type = 'text' }) {
   return (
     <div>
-      <label htmlFor={id} className="text-white/50 text-xs mb-1.5 block">{label}</label>
+      <label htmlFor={id} className="text-gray-700 text-xs font-bold mb-1.5 block">{label}</label>
       <input
         id={id}
         type={type}
@@ -184,16 +225,8 @@ function Input({ label, id, placeholder, value, onChange, maxLength, type = 'tex
         value={value}
         maxLength={maxLength}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-3 text-white text-sm placeholder-white/20 focus:outline-none focus:border-purple transition-colors"
+        className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-gray-800 text-xs font-semibold placeholder-gray-300 focus:outline-none focus:border-purple focus:ring-1 focus:ring-purple transition-all"
       />
     </div>
-  );
-}
-
-function BackIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
-      <path d="M19 12H5M12 19l-7-7 7-7" />
-    </svg>
   );
 }
