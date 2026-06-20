@@ -73,3 +73,39 @@ Open [http://localhost:5173](http://localhost:5173)
 | POST | `/api/bookings` | Create booking (atomic seat lock) |
 | GET | `/api/bookings?userId=` | Booking history |
 | PATCH | `/api/bookings/:id/cancel` | Cancel + free seats |
+
+---
+
+## Production & Deployment
+
+The application is structured as a **single unified deployment**. The Express server compiles and serves the React frontend statically in production.
+
+### 1. Unified Build & Run Command
+To compile the client and run the server locally in production mode:
+```bash
+# 1. Install dependencies and compile Vite frontend
+npm run build
+
+# 2. Run in production mode
+npm start
+```
+
+### 2. Environment Variables
+When deploying to cloud platforms (Render, Heroku, etc.), set the following environment variables:
+*   `NODE_ENV`: `production` (toggles serving static assets from `/client/dist`)
+*   `MONGODB_URI`: Your MongoDB Atlas connection string (e.g., `mongodb+srv://...`)
+*   `TMDB_API_KEY`: Your TMDB API key
+*   `PORT`: Port for the application to listen on (defaults to `5000`)
+*   `CLIENT_ORIGIN`: Allowed CORS origin (defaults to `*` in production)
+
+### 3. Deploying to Render.com
+This project includes a `render.yaml` template for quick deployment:
+1. Push this repository to GitHub or GitLab.
+2. Log in to [Render.com](https://render.com) and create a new **Blueprint**.
+3. Link your repository. Render will automatically detect the settings in `render.yaml` to deploy your Web Service.
+4. Set your `MONGODB_URI` and `TMDB_API_KEY` in the Render environment settings.
+5. Once active, run the seed command inside the Render shell once (under the "Shell" tab of the web service dashboard) to populate initial theatres and showtimes:
+   ```bash
+   npm run seed
+   ```
+

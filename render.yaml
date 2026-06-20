@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: movie-ticket-reservation
+    runtime: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false   # Set this in Render dashboard — your Atlas URI
+      - key: TMDB_API_KEY
+        sync: false   # Set this in Render dashboard
+      - key: TMDB_BASE_URL
+        value: https://api.themoviedb.org/3
+      - key: TMDB_IMAGE_BASE
+        value: https://image.tmdb.org/t/p/w500

@@ -1,5 +1,23 @@
+# Dependencies
 node_modules/
 client/node_modules/
+
+# Environment secrets — NEVER commit these
 .env
+server/.env
+
+# Production build output
 dist/
 client/dist/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS artifacts
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/

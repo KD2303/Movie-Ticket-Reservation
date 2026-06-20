@@ -3,10 +3,14 @@
   "version": "1.0.0",
   "description": "Movie Ticket Reservation System — React + Redux + Node.js/Express + MongoDB",
   "main": "server/server.js",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "scripts": {
-    "start": "node server/server.js",
+    "start": "NODE_ENV=production node server/server.js",
     "dev": "nodemon server/server.js",
     "seed": "node server/seed/seedData.js",
+    "build": "npm install --prefix client && npm run build --prefix client",
     "client": "npm run dev --prefix client",
     "dev:all": "concurrently \"npm run dev\" \"npm run client\""
   },
