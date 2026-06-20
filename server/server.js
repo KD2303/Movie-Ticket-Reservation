@@ -23,7 +23,7 @@ const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:3000',
   process.env.CLIENT_ORIGIN
-].filter(Boolean);
+].filter(Boolean).map(url => url.trim().replace(/\/$/, ''));
 
 app.use(cors({
   origin: (origin, callback) => {
@@ -35,14 +35,14 @@ app.use(cors({
       return callback(null, true);
     }
 
-    // Match exact origin or wildcard pattern
+    // Match exact origin, wildcard pattern, or any vercel.app subdomain
     const isAllowed = allowedOrigins.some((allowed) => {
       if (allowed === '*' || allowed === origin) return true;
       if (allowed.startsWith('*.')) {
         return origin.endsWith(allowed.slice(2));
       }
       return false;
-    });
+    }) || origin.endsWith('.vercel.app') || origin === 'https://vercel.app';
 
     if (isAllowed) {
       callback(null, true);
