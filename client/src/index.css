@@ -1,0 +1,96 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  background-color: #0D0D0D;
+  color: #ffffff;
+  font-family: 'Inter', system-ui, sans-serif;
+  margin: 0;
+  padding: 0;
+  overscroll-behavior: none;
+}
+
+#root {
+  min-height: 100svh;
+  display: flex;
+  justify-content: center;
+}
+
+.app-shell {
+  width: 100%;
+  max-width: 390px;
+  min-height: 100svh;
+  background: #0D0D0D;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 0px;
+  height: 0px;
+}
+
+/* Horizontal scroll snapping */
+.scroll-snap-x {
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+.scroll-snap-item {
+  scroll-snap-align: start;
+}
+
+/* Animations */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 8px rgba(123, 97, 255, 0.4); }
+  50%       { box-shadow: 0 0 20px rgba(123, 97, 255, 0.8); }
+}
+@keyframes scaleIn {
+  from { transform: scale(0.92); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+
+.fade-up { animation: fadeUp 0.4s ease forwards; }
+.fade-in { animation: fadeIn 0.3s ease forwards; }
+.scale-in { animation: scaleIn 0.3s ease forwards; }
+.pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
+
+/* Glass effect */
+.glass {
+  background: rgba(255,255,255,0.06);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+/* Purple gradient */
+.gradient-purple {
+  background: linear-gradient(135deg, #7B61FF 0%, #5B41DF 100%);
+}
+
+/* Skeleton loader */
+.skeleton {
+  background: linear-gradient(90deg, #222 25%, #2a2a2a 50%, #222 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}

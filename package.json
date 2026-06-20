@@ -1,0 +1,24 @@
+{
+  "name": "movie-ticket-reservation",
+  "version": "1.0.0",
+  "description": "Movie Ticket Reservation System — React + Redux + Node.js/Express + MongoDB",
+  "main": "server/server.js",
+  "scripts": {
+    "start": "node server/server.js",
+    "dev": "node server/server.js",
+    "seed": "node server/seed/seedData.js",
+    "client": "npm run dev --prefix client",
+    "dev:all": "start \"Backend\" node server/server.js && start \"Frontend\" npm run dev --prefix client"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.9.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "mongoose": "^8.14.1",
+    "node-cache": "^5.1.2"
+  }
+}
