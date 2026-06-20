@@ -18,12 +18,40 @@ const errorHandler = require('./middleware/errorHandler');
 const app = express();
 const IS_PROD = process.env.NODE_ENV === 'production';
 
-// CORS — in dev allow the Vite dev server; in prod the same origin serves the app
-const allowedOrigins = IS_PROD
-  ? [process.env.CLIENT_ORIGIN || '*']
-  : ['http://localhost:5173', 'http://localhost:3000'];
+// CORS configuration supporting dynamic validation for credentials
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  process.env.CLIENT_ORIGIN
+].filter(Boolean);
 
-app.use(cors({ origin: allowedOrigins, credentials: true }));
+app.use(cors({
+  origin: (origin, callback) => {
+    // Allow requests with no origin (e.g. mobile apps, postman, curl)
+    if (!origin) return callback(null, true);
+
+    // If client origin is not explicitly configured or we are in development, allow the origin
+    if (!IS_PROD || !process.env.CLIENT_ORIGIN) {
+      return callback(null, true);
+    }
+
+    // Match exact origin or wildcard pattern
+    const isAllowed = allowedOrigins.some((allowed) => {
+      if (allowed === '*' || allowed === origin) return true;
+      if (allowed.startsWith('*.')) {
+        return origin.endsWith(allowed.slice(2));
+      }
+      return false;
+    });
+
+    if (isAllowed) {
+      callback(null, true);
+    } else {
+      callback(null, false); // block CORS
+    }
+  },
+  credentials: true
+}));
 app.use(express.json());
 
 // API Routes
