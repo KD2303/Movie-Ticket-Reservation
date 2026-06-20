@@ -1,4 +1,5 @@
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '.env') });
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
@@ -21,15 +22,18 @@ app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 // Error handler
 app.use(errorHandler);
 
-// Connect MongoDB & start server
+// Start HTTP server immediately — TMDB movie routes work without MongoDB
 const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));
+
+// Connect MongoDB in background — DB-dependent routes (showtimes, bookings, theatres)
+// will return 500 errors if MongoDB is unavailable, but movie routes still work.
 mongoose
   .connect(process.env.MONGODB_URI)
   .then(() => {
     console.log('✅ MongoDB connected');
-    app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));
   })
   .catch((err) => {
-    console.error('❌ MongoDB connection failed:', err.message);
-    process.exit(1);
+    console.error('⚠️  MongoDB unavailable — showtimes/bookings routes inactive:', err.message);
+    // Do NOT exit — TMDB movie routes remain functional
   });

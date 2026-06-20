@@ -23,8 +23,9 @@ const mapCast = (c) => ({
 
 exports.getNowPlaying = async (req, res) => {
   try {
-    const resp = await tmdbService.getNowPlaying();
-    const movies = resp.data.results.map(mapMovie);
+    // tmdbService.getNowPlaying() now returns the data object directly (not resp.data)
+    const data = await tmdbService.getNowPlaying();
+    const movies = data.results.map(mapMovie);
     res.json({ success: true, data: movies });
   } catch (err) {
     console.error('TMDB now_playing error:', err.message);
@@ -34,8 +35,8 @@ exports.getNowPlaying = async (req, res) => {
 
 exports.getUpcoming = async (req, res) => {
   try {
-    const resp = await tmdbService.getUpcoming();
-    const movies = resp.data.results.map(mapMovie);
+    const data = await tmdbService.getUpcoming();
+    const movies = data.results.map(mapMovie);
     res.json({ success: true, data: movies });
   } catch (err) {
     console.error('TMDB upcoming error:', err.message);
@@ -46,12 +47,12 @@ exports.getUpcoming = async (req, res) => {
 exports.getMovieById = async (req, res) => {
   try {
     const { tmdbId } = req.params;
-    const [movieResp, creditsResp] = await Promise.all([
+    const [movieData, creditsData] = await Promise.all([
       tmdbService.getMovieById(tmdbId),
       tmdbService.getCredits(tmdbId),
     ]);
-    const movie = mapMovie(movieResp.data);
-    const cast = creditsResp.data.cast.slice(0, 10).map(mapCast);
+    const movie = mapMovie(movieData);
+    const cast = creditsData.cast.slice(0, 10).map(mapCast);
     res.json({ success: true, data: { ...movie, cast } });
   } catch (err) {
     console.error('TMDB movie detail error:', err.message);

@@ -4,7 +4,13 @@ import { useNavigate } from 'react-router-dom';
 export default function Search() {
   const navigate = useNavigate();
   const { nowShowing, comingSoon } = useSelector((s) => s.movies);
-  const all = [...nowShowing, ...comingSoon];
+  // Deduplicate by TMDB ID — a movie can appear in both lists
+  const seen = new Set();
+  const all = [...nowShowing, ...comingSoon].filter((m) => {
+    if (seen.has(m.id)) return false;
+    seen.add(m.id);
+    return true;
+  });
 
   return (
     <div className="pb-24 bg-white min-h-screen">

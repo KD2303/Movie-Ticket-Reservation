@@ -83,9 +83,12 @@ export default function Schedule() {
     navigate('/seats');
   };
 
-  // Filter showtimes for the selected local theatre
+  // Filter showtimes for the selected local theatre AND selected format
   const filteredShowtimes = localTheatre
-    ? showtimes.filter((st) => (st.theatreId?._id || st.theatreId) === localTheatre._id)
+    ? showtimes.filter((st) =>
+        (st.theatreId?._id || st.theatreId) === localTheatre._id &&
+        st.format === selectedFormat
+      )
     : [];
 
   // Group filtered showtimes by screen (e.g. "Screen 1", "Screen 2")

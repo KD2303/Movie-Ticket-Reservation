@@ -6,7 +6,7 @@ export default function BookingSummary() {
   const { selectedSeats, selectedDate, selectedTime, selectedTheatre, selectedShowtime, seatPrice, totalPrice } = useSelector((s) => s.booking);
   const { selectedMovie } = useSelector((s) => s.movies);
 
-  const BOOKING_FEE = 20;
+  const BOOKING_FEE = 30; // Must match bookingSlice.js constant
   const baseTotal = selectedSeats.length * seatPrice;
 
   if (!selectedMovie || selectedSeats.length === 0) {
