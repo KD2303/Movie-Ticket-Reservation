@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux';
 import { fetchSeats } from '../services/api';
 import ScreenArc from '../components/ScreenArc';
 import SeatGrid from '../components/SeatGrid';
+import PriceSummary from '../components/PriceSummary';
 
 const LEGEND = [
   { color: 'border-purple bg-white', label: 'Available' },
@@ -20,13 +21,16 @@ export default function SeatSelection() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!selectedShowtime?._id) return;
+    if (!selectedShowtime?._id) {
+      navigate('/');
+      return;
+    }
     setLoading(true);
     fetchSeats(selectedShowtime._id)
       .then((r) => setSeatMatrix(r.data.data.seatMatrix))
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, [selectedShowtime]);
+  }, [selectedShowtime, navigate]);
 
   const canProceed = selectedSeats.length > 0;
 
@@ -73,6 +77,11 @@ export default function SeatSelection() {
         ) : (
           <SeatGrid seatMatrix={seatMatrix} />
         )}
+      </div>
+
+      {/* Live Price Summary */}
+      <div className="px-5 mb-4">
+        <PriceSummary compact={true} />
       </div>
 
       {/* Legends */}

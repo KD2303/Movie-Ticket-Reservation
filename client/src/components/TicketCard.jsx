@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { cancelBookingThunk, loadBookings } from '../store/historySlice';
+import { cancelBookingThunk } from '../store/historySlice';
 import { QRCodeSVG as QRCode } from 'qrcode.react';
-import axios from 'axios';
+import { fetchMovieById } from '../services/api';
 
 const STATUS_MAP = {
   active: { label: 'Active', cls: 'bg-green-50 text-green-600 border border-green-200' },
@@ -24,7 +24,7 @@ export default function TicketCard({ booking }) {
 
   useEffect(() => {
     if (showtime?.tmdbMovieId) {
-      axios.get(`/api/movies/${showtime.tmdbMovieId}`)
+      fetchMovieById(showtime.tmdbMovieId)
         .then((res) => {
           if (res.data?.data?.title) {
             setMovieName(res.data.data.title);
@@ -37,7 +37,6 @@ export default function TicketCard({ booking }) {
   const handleCancel = async () => {
     setCancelling(true);
     await dispatch(cancelBookingThunk(booking._id));
-    await dispatch(loadBookings());
     setCancelling(false);
     setShowCancel(false);
   };

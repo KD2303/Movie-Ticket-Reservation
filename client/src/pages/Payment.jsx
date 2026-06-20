@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
+import { BOOKING_FEE } from '../constants';
 import { createBooking } from '../services/api';
 import { clearBooking } from '../store/bookingSlice';
 
@@ -10,7 +11,12 @@ export default function Payment() {
   const { selectedSeats, selectedShowtime, totalPrice, seatPrice } = useSelector((s) => s.booking);
   const { selectedMovie } = useSelector((s) => s.movies);
 
-  const BOOKING_FEE = 20;
+  useEffect(() => {
+    if (!selectedShowtime?._id) {
+      navigate('/');
+    }
+  }, [selectedShowtime, navigate]);
+
   const baseTotal = selectedSeats.length * seatPrice;
 
   const [paymentMethod, setPaymentMethod] = useState('card'); // 'card' or 'wallet'

@@ -40,8 +40,8 @@ export function SeatCell({ seat }) {
 export default function SeatGrid({ seatMatrix }) {
   if (!seatMatrix || seatMatrix.length === 0) return null;
 
-  // Let's create rows A-H, then gap, then J-M
-  const AISLE_AFTER_ROW = ['H']; // gap after H (since there's no row I in many theatres)
+  // Let's create gaps after row D and row I
+  const AISLE_AFTER_ROW = ['D', 'I'];
 
   return (
     <div className="flex flex-col items-center gap-1.5 py-4 overflow-x-auto w-full select-none">
@@ -55,34 +55,11 @@ export default function SeatGrid({ seatMatrix }) {
               {/* Left row letter */}
               <span className="text-[10px] text-gray-400 w-3 text-center font-bold">{rowLabel}</span>
               
-              {/* Row seats with 2-8-2 layout */}
-              <div className="flex items-center gap-1.5">
-                {/* First 2 seats */}
-                <div className="flex gap-1">
-                  {row.slice(0, 2).map((seat, cIdx) => (
-                    <SeatCell key={cIdx} seat={seat} />
-                  ))}
-                </div>
-
-                {/* Left Aisle */}
-                <div className="w-2.5" />
-
-                {/* Middle 8 seats */}
-                <div className="flex gap-1">
-                  {row.slice(2, 10).map((seat, cIdx) => (
-                    <SeatCell key={cIdx + 2} seat={seat} />
-                  ))}
-                </div>
-
-                {/* Right Aisle */}
-                <div className="w-2.5" />
-
-                {/* Last 2 seats */}
-                <div className="flex gap-1">
-                  {row.slice(10).map((seat, cIdx) => (
-                    <SeatCell key={cIdx + 10} seat={seat} />
-                  ))}
-                </div>
+              {/* Row seats with straight layout */}
+              <div className="flex items-center gap-1">
+                {row.map((seat, cIdx) => (
+                  <SeatCell key={cIdx} seat={seat} />
+                ))}
               </div>
 
               {/* Right row letter */}

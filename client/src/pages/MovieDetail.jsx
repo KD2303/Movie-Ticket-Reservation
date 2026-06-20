@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { loadMovieById, setSelectedFormat } from '../store/movieSlice';
 
-const FORMATS = ['2D', '3D'];
+const FORMATS = ['2D', '3D', 'IMAX'];
 
 export default function MovieDetail() {
   const { id } = useParams();
@@ -16,7 +16,10 @@ export default function MovieDetail() {
     dispatch(loadMovieById(id));
   }, [id, dispatch]);
 
-  if (loading || !selectedMovie) {
+  const m = selectedMovie;
+  const isCorrectMovie = m && String(m.id) === String(id);
+
+  if (!isCorrectMovie) {
     return (
       <div className="bg-white min-h-screen pb-24">
         <div className="h-[250px] skeleton" />
@@ -28,8 +31,6 @@ export default function MovieDetail() {
       </div>
     );
   }
-
-  const m = selectedMovie;
 
   return (
     <div className="bg-white min-h-screen pb-40">

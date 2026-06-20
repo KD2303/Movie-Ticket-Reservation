@@ -5,10 +5,10 @@
   "main": "server/server.js",
   "scripts": {
     "start": "node server/server.js",
-    "dev": "node server/server.js",
+    "dev": "nodemon server/server.js",
     "seed": "node server/seed/seedData.js",
     "client": "npm run dev --prefix client",
-    "dev:all": "start \"Backend\" node server/server.js && start \"Frontend\" npm run dev --prefix client"
+    "dev:all": "concurrently \"npm run dev\" \"npm run client\""
   },
   "keywords": [],
   "author": "",
@@ -20,5 +20,9 @@
     "express": "^5.1.0",
     "mongoose": "^8.14.1",
     "node-cache": "^5.1.2"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.3",
+    "nodemon": "^3.1.14"
   }
 }

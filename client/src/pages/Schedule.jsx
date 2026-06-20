@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { setSelectedDate, setSelectedTime, setSelectedTheatre, setSelectedShowtime } from '../store/bookingSlice';
+import { setSelectedFormat } from '../store/movieSlice';
 import { fetchShowtimes } from '../services/api';
 
 function getNext7Days() {
@@ -25,12 +26,21 @@ export default function Schedule() {
   const [showtimes, setShowtimes] = useState([]);
   const [loading, setLoading] = useState(false);
   
+  const { selectedTheatre } = useSelector((s) => s.booking);
+  
   // Local state for theatre selection (Screen 3 -> Screen 4)
-  const [localTheatre, setLocalTheatre] = useState(null);
+  const [localTheatre, setLocalTheatre] = useState(selectedTheatre || null);
   const [selectedSt, setSelectedSt] = useState(null);
 
+  useEffect(() => {
+    if (selectedTheatre) {
+      setLocalTheatre(selectedTheatre);
+    }
+  }, [selectedTheatre]);
+
   const activeDate = dates[activeDateIdx];
-  const isoDate = activeDate.toISOString().split('T')[0];
+  // Use local date string (not toISOString which converts to UTC and can shift the day)
+  const isoDate = `${activeDate.getFullYear()}-${String(activeDate.getMonth() + 1).padStart(2, '0')}-${String(activeDate.getDate()).padStart(2, '0')}`;
 
   useEffect(() => {
     if (!selectedMovie) return;
@@ -213,12 +223,23 @@ export default function Schedule() {
           <div className="px-5">
             <h2 className="text-gray-800 font-extrabold text-sm uppercase tracking-wide mb-4">Choose Schedule</h2>
 
-            {/* Format info/Price range */}
+            {/* Format Selector / Price range */}
             <div className="flex justify-between items-center mb-5">
               <div className="flex gap-2">
-                <span className="px-3 py-1 rounded-lg text-xs font-bold border border-purple text-purple bg-purple-light">
-                  {selectedFormat}
-                </span>
+                {['2D', '3D', 'IMAX'].map((fmt) => (
+                  <button
+                    key={fmt}
+                    id={`schedule-format-${fmt}`}
+                    onClick={() => dispatch(setSelectedFormat(fmt))}
+                    className={`px-3 py-1 rounded-lg text-xs font-bold border transition-all ${
+                      selectedFormat === fmt
+                        ? 'border-purple text-purple bg-purple-light'
+                        : 'border-gray-200 text-gray-400 bg-white'
+                    }`}
+                  >
+                    {fmt}
+                  </button>
+                ))}
               </div>
               <span className="text-gray-500 text-xs font-bold">
                 ₹{filteredShowtimes[0]?.price ? filteredShowtimes[0].price : '320 - ₹450'}

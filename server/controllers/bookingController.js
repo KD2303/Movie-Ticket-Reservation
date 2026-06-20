@@ -13,23 +13,56 @@ exports.createBooking = async (req, res) => {
     const showtime = await Showtime.findById(showtimeId);
     if (!showtime) return res.status(404).json({ success: false, message: 'Showtime not found' });
 
-    // Verify all requested seats are still available
-    for (const seat of seats) {
-      const rowArr = showtime.seatMatrix.find((r) => r[0]?.row === seat.row);
-      if (!rowArr) return res.status(400).json({ success: false, message: `Row ${seat.row} not found` });
-      const cell = rowArr.find((c) => c.col === seat.col);
-      if (!cell || cell.status === 'occupied') {
-        return res.status(409).json({ success: false, message: `Seat ${seat.row}${seat.col} already occupied` });
-      }
-    }
+    const lockedSeats = [];
+    try {
+      for (const seat of seats) {
+        const result = await Showtime.findOneAndUpdate(
+          {
+            _id: showtimeId,
+            seatMatrix: {
+              $elemMatch: {
+                $elemMatch: { row: seat.row, col: seat.col, status: 'available' }
+              }
+            }
+          },
+          {
+            $set: { 'seatMatrix.$[row].$[cell].status': 'occupied' }
+          },
+          {
+            arrayFilters: [
+              { 'row.row': seat.row },
+              { 'cell.col': seat.col, 'cell.status': 'available' }
+            ],
+            new: true
+          }
+        );
 
-    // Mark seats as occupied
-    for (const seat of seats) {
-      await Showtime.updateOne(
-        { _id: showtimeId, 'seatMatrix.row': seat.row, 'seatMatrix.col': seat.col },
-        { $set: { 'seatMatrix.$[row].$[cell].status': 'occupied' } },
-        { arrayFilters: [{ 'row.row': seat.row }, { 'cell.col': seat.col }] }
-      );
+        if (!result) {
+          // Seat was taken or not found. Roll back any seats already marked in this loop.
+          for (const locked of lockedSeats) {
+            await Showtime.updateOne(
+              { _id: showtimeId },
+              { $set: { 'seatMatrix.$[row].$[cell].status': 'available' } },
+              { arrayFilters: [{ 'row.row': locked.row }, { 'cell.col': locked.col }] }
+            );
+          }
+          return res.status(409).json({
+            success: false,
+            message: `Seat ${seat.row}${seat.col} is already occupied or invalid`
+          });
+        }
+        lockedSeats.push(seat);
+      }
+    } catch (lockError) {
+      // Rollback on database error
+      for (const locked of lockedSeats) {
+        await Showtime.updateOne(
+          { _id: showtimeId },
+          { $set: { 'seatMatrix.$[row].$[cell].status': 'available' } },
+          { arrayFilters: [{ 'row.row': locked.row }, { 'cell.col': locked.col }] }
+        );
+      }
+      throw lockError;
     }
 
     const calculated = seats.length * showtime.price + BOOKING_FEE;

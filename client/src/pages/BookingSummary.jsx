@@ -1,12 +1,19 @@
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import { BOOKING_FEE } from '../constants';
 
 export default function BookingSummary() {
   const navigate = useNavigate();
   const { selectedSeats, selectedDate, selectedTime, selectedTheatre, selectedShowtime, seatPrice, totalPrice } = useSelector((s) => s.booking);
   const { selectedMovie } = useSelector((s) => s.movies);
 
-  const BOOKING_FEE = 30; // Must match bookingSlice.js constant
+  useEffect(() => {
+    if (!selectedShowtime?._id) {
+      navigate('/');
+    }
+  }, [selectedShowtime, navigate]);
+
   const baseTotal = selectedSeats.length * seatPrice;
 
   if (!selectedMovie || selectedSeats.length === 0) {
@@ -22,9 +29,11 @@ export default function BookingSummary() {
     );
   }
 
-  const dateStr = selectedDate
-    ? new Date(selectedDate).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
-    : '—';
+  // Parse date string (YYYY-MM-DD) as local date to avoid UTC timezone shift
+  const dateStr = selectedDate ? (() => {
+    const [y, m, d] = selectedDate.split('-').map(Number);
+    return new Date(y, m - 1, d).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+  })() : '—';
 
   return (
     <div className="bg-white min-h-screen pb-40">

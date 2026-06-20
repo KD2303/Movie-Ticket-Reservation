@@ -2,8 +2,8 @@ import { useLocation, useNavigate } from 'react-router-dom';
 
 const navItems = [
   { path: '/', label: 'Home', icon: HomeIcon },
-  { path: '/search', label: 'Tickets', icon: GridIcon },
-  { path: '/bookings', label: 'Favorites', icon: HeartIcon },
+  { path: '/search', label: 'Search', icon: SearchIcon },
+  { path: '/bookings', label: 'Tickets', icon: TicketIcon },
   { path: '/profile', label: 'Profile', icon: ProfileIcon },
 ];
 
@@ -11,17 +11,18 @@ export default function BottomNav() {
   const location = useLocation();
   const navigate = useNavigate();
 
+  const HIDDEN_PATHS = ['/schedule', '/seats', '/summary', '/payment'];
+  if (HIDDEN_PATHS.includes(location.pathname)) {
+    return null;
+  }
+
   return (
     <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[390px] z-50 bg-white border-t border-gray-100 shadow-[0_-4px_12px_rgba(0,0,0,0.03)]">
       <div className="flex justify-around items-center h-16 px-2">
         {navItems.map(({ path, label, icon: Icon }) => {
-          // Highlight Home for / and /movie/*, Tickets for /schedule, /seats, /summary, /payment, /bookings
-          const isHomeActive = path === '/' && (location.pathname === '/' || location.pathname.startsWith('/movie'));
-          const isTicketsActive = path === '/search' && (location.pathname === '/search' || location.pathname === '/schedule' || location.pathname === '/seats' || location.pathname === '/summary' || location.pathname === '/payment');
-          const isFavActive = path === '/bookings' && location.pathname === '/bookings';
-          const isProfileActive = path === '/profile' && location.pathname === '/profile';
-
-          const isActive = isHomeActive || isTicketsActive || isFavActive || isProfileActive;
+          const isActive = path === '/'
+            ? (location.pathname === '/' || location.pathname.startsWith('/movie'))
+            : location.pathname === path;
 
           return (
             <button
@@ -50,21 +51,21 @@ function HomeIcon({ size = 24, filled }) {
   );
 }
 
-function GridIcon({ size = 24, filled }) {
+function SearchIcon({ size = 24, filled }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill={filled ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="3" y="3" width="7" height="7" />
-      <rect x="14" y="3" width="7" height="7" />
-      <rect x="14" y="14" width="7" height="7" />
-      <rect x="3" y="14" width="7" height="7" />
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="11" cy="11" r="8" />
+      <path d="m21 21-4.35-4.35" />
     </svg>
   );
 }
 
-function HeartIcon({ size = 24, filled }) {
+function TicketIcon({ size = 24, filled }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill={filled ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
+      <rect x="2" y="5" width="20" height="14" rx="2" />
+      <line x1="6" y1="5" x2="6" y2="19" strokeDasharray="3" />
+      <line x1="18" y1="5" x2="18" y2="19" strokeDasharray="3" />
     </svg>
   );
 }

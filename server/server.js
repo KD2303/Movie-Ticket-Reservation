@@ -1,5 +1,15 @@
 const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '.env') });
+
+// Validate environment variables on startup
+const REQUIRED_ENV = ['MONGODB_URI', 'TMDB_API_KEY'];
+const missingEnv = REQUIRED_ENV.filter((key) => !process.env[key]);
+if (missingEnv.length > 0) {
+  console.error(`❌ Critical environment variables missing: ${missingEnv.join(', ')}`);
+  console.error(`Please create a 'server/.env' file containing these variables. See 'server/.env.example' for guidance.`);
+  process.exit(1);
+}
+
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');

@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { loadNowPlaying, loadUpcoming } from '../store/movieSlice';
+import { loadNowPlaying, loadUpcoming, setSelectedMovie } from '../store/movieSlice';
+import { setSelectedTheatre } from '../store/bookingSlice';
 import { fetchTheatres } from '../services/api';
 import MovieCard from '../components/MovieCard';
 
@@ -11,6 +12,14 @@ export default function Home() {
   const { nowShowing, comingSoon, loading } = useSelector((s) => s.movies);
   const [theatres, setTheatres] = useState([]);
   const [activeTab, setActiveTab] = useState('now'); // 'now' or 'coming'
+
+  const handleTheatreBook = (t) => {
+    if (nowShowing && nowShowing.length > 0) {
+      dispatch(setSelectedMovie(nowShowing[0]));
+    }
+    dispatch(setSelectedTheatre(t));
+    navigate('/schedule');
+  };
 
   useEffect(() => {
     dispatch(loadNowPlaying());
@@ -73,7 +82,7 @@ export default function Home() {
             {activeTab === 'coming' && <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-purple rounded-full" />}
           </button>
         </div>
-        <button className="text-purple text-xs font-bold pb-2 hover:underline">View All</button>
+        <button onClick={() => navigate('/search')} className="text-purple text-xs font-bold pb-2 hover:underline">View All</button>
       </div>
 
       {/* Movie Horizontal List */}
@@ -100,7 +109,7 @@ export default function Home() {
       <div className="mt-6 px-5">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-gray-900 font-extrabold text-base">Movie Theatres</h2>
-          <button className="text-purple text-xs font-bold hover:underline">View All</button>
+          <button onClick={() => navigate('/search')} className="text-purple text-xs font-bold hover:underline">View All</button>
         </div>
         <div className="flex flex-col gap-3">
           {theatres.map((t) => (
@@ -114,7 +123,10 @@ export default function Home() {
                 <p className="text-gray-400 text-[11px] font-medium leading-none mt-1">📍 {t.location}</p>
                 <p className="text-purple text-xs font-bold mt-1.5">₹{t.basePrice} - ₹{t.basePrice + 170}</p>
               </div>
-              <button className="bg-purple-light hover:bg-purple/10 text-purple text-xs font-bold px-3 py-1.5 rounded-xl transition-colors">
+              <button
+                onClick={() => handleTheatreBook(t)}
+                className="bg-purple-light hover:bg-purple/10 text-purple text-xs font-bold px-3 py-1.5 rounded-xl transition-colors"
+              >
                 Book
               </button>
             </div>

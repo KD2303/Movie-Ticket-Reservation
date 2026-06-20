@@ -1,6 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
 
-const BOOKING_FEE = 30;
+import { BOOKING_FEE } from '../constants';
 const MAX_SEATS = 6;
 
 const bookingSlice = createSlice({
@@ -35,7 +35,8 @@ const bookingSlice = createSlice({
         if (state.selectedSeats.length >= MAX_SEATS) return;
         state.selectedSeats.push(seat);
       }
-      state.totalPrice = state.selectedSeats.length * state.seatPrice + BOOKING_FEE;
+      const count = state.selectedSeats.length;
+      state.totalPrice = count > 0 ? count * state.seatPrice + BOOKING_FEE : 0;
     },
     clearSeats: (state) => {
       state.selectedSeats = [];
