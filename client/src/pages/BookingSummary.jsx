@@ -9,15 +9,20 @@ export default function BookingSummary() {
   const { selectedMovie } = useSelector((s) => s.movies);
   const { isLoggedIn } = useSelector((s) => s.auth);
 
+  // Auth guard — must be logged in to access checkout
   useEffect(() => {
     if (!isLoggedIn) {
-      navigate('/login?redirect=/summary');
-      return;
+      navigate('/login?redirect=/summary', { replace: true });
     }
-    if (!selectedShowtime?._id) {
-      navigate('/');
+  }, [isLoggedIn, navigate]);
+
+  // Data guard — selectedShowtime is intentionally not persisted (avoids ObjectId corruption)
+  // so only redirect away if the user is logged in but arrived here without a valid flow
+  useEffect(() => {
+    if (isLoggedIn && !selectedShowtime?._id) {
+      navigate('/', { replace: true });
     }
-  }, [selectedShowtime, navigate, isLoggedIn]);
+  }, [isLoggedIn, selectedShowtime, navigate]);
 
   const baseTotal = selectedSeats.length * seatPrice;
 
