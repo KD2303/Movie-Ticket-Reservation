@@ -10,11 +10,25 @@ const tmdb = axios.create({
   timeout: 10000,
 });
 
+// Retry once on transient network errors (ECONNRESET, ETIMEDOUT, etc.)
+const withRetry = async (fn, retries = 1, delayMs = 600) => {
+  try {
+    return await fn();
+  } catch (err) {
+    const isNetworkErr = err.code === 'ECONNRESET' || err.code === 'ETIMEDOUT' || err.code === 'ENOTFOUND';
+    if (retries > 0 && isNetworkErr) {
+      await new Promise((r) => setTimeout(r, delayMs));
+      return withRetry(fn, retries - 1, delayMs);
+    }
+    throw err;
+  }
+};
+
 // Cache only the response DATA (not the full axios response with circular refs)
 const cached = async (key, fn) => {
   const hit = cache.get(key);
   if (hit !== undefined) return hit;
-  const result = await fn();
+  const result = await withRetry(fn);
   cache.set(key, result.data); // Store only serializable .data
   return result.data;
 };

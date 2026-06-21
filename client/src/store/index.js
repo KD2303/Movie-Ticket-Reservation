@@ -14,7 +14,9 @@ const storage = {
 const bookingPersistConfig = {
   key: 'booking',
   storage,
-  whitelist: ['selectedDate', 'selectedTime', 'selectedTheatre', 'selectedShowtime', 'selectedSeats', 'seatPrice', 'totalPrice'],
+  // 'selectedShowtime' intentionally excluded — it contains ObjectId refs that corrupt on rehydrate
+  // (serializes as string "F"), causing 500 errors on /api/bookings. Keep in session memory only.
+  whitelist: ['selectedDate', 'selectedTime', 'selectedTheatre', 'selectedSeats', 'seatPrice', 'totalPrice'],
 };
 
 const moviePersistConfig = {

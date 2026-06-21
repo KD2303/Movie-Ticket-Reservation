@@ -1,74 +1,108 @@
+const mongoose = require('mongoose');
 const Booking = require('../models/Booking');
 const Showtime = require('../models/Showtime');
 
 const BOOKING_FEE = 30;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// WHY native driver?
+// Mongoose 8 throws "Parameter 'obj' to Document() must be an object, got 'A'
+// (type string)" when arrayFilters are used on a [[seatSchema]] (2-D nested
+// subdocument array), even with { strict: false }.  The schema-cast runs before
+// the strict flag is checked.  Using the raw MongoDB collection bypasses all
+// Mongoose schema casting and lets MongoDB execute $[row]/$[cell] correctly.
+// ─────────────────────────────────────────────────────────────────────────────
+function getCol() {
+  return mongoose.connection.db.collection('showtimes');
+}
 
 exports.createBooking = async (req, res) => {
   const { userId = 'guest', showtimeId, seats, totalAmount } = req.body;
   if (!showtimeId || !seats || seats.length === 0) {
     return res.status(400).json({ success: false, message: 'showtimeId and seats are required' });
   }
+
+  let oid;
   try {
-    // Atomically lock seats
-    const showtime = await Showtime.findById(showtimeId);
+    oid = new mongoose.Types.ObjectId(showtimeId);
+  } catch {
+    return res.status(400).json({ success: false, message: 'Invalid showtimeId format' });
+  }
+
+  try {
+    // Use Mongoose just to fetch price — no arrayFilters involved
+    const showtime = await Showtime.findById(oid);
     if (!showtime) return res.status(404).json({ success: false, message: 'Showtime not found' });
 
+    const col = getCol();
     const lockedSeats = [];
+
     try {
       for (const seat of seats) {
-        const result = await Showtime.findOneAndUpdate(
+        // Native driver: atomically flip one seat available → occupied.
+        // $[row] matches any inner array whose .row === seat.row
+        // $[cell] matches the element in that row whose .col === seat.col AND .status === 'available'
+        const result = await col.updateOne(
           {
-            _id: showtimeId,
+            _id: oid,
             seatMatrix: {
               $elemMatch: {
-                $elemMatch: { row: seat.row, col: seat.col, status: 'available' }
-              }
-            }
+                $elemMatch: { row: seat.row, col: seat.col, status: 'available' },
+              },
+            },
           },
-          {
-            $set: { 'seatMatrix.$[row].$[cell].status': 'occupied' }
-          },
+          { $set: { 'seatMatrix.$[row].$[cell].status': 'occupied' } },
           {
             arrayFilters: [
               { 'row.row': seat.row },
-              { 'cell.col': seat.col, 'cell.status': 'available' }
+              { 'cell.col': seat.col, 'cell.status': 'available' },
             ],
-            new: true
           }
         );
 
-        if (!result) {
-          // Seat was taken or not found. Roll back any seats already marked in this loop.
+        if (result.modifiedCount === 0) {
+          // Seat was already taken — roll back previously locked seats
           for (const locked of lockedSeats) {
-            await Showtime.updateOne(
-              { _id: showtimeId },
+            await col.updateOne(
+              { _id: oid },
               { $set: { 'seatMatrix.$[row].$[cell].status': 'available' } },
-              { arrayFilters: [{ 'row.row': locked.row }, { 'cell.col': locked.col }] }
+              {
+                arrayFilters: [
+                  { 'row.row': locked.row },
+                  { 'cell.col': locked.col },
+                ],
+              }
             );
           }
           return res.status(409).json({
             success: false,
-            message: `Seat ${seat.row}${seat.col} is already occupied or invalid`
+            message: `Seat ${seat.row}${seat.col} is already occupied or unavailable`,
           });
         }
+
         lockedSeats.push(seat);
       }
-    } catch (lockError) {
-      // Rollback on database error
+    } catch (lockErr) {
+      // DB error mid-loop — try to roll back whatever we locked
       for (const locked of lockedSeats) {
-        await Showtime.updateOne(
-          { _id: showtimeId },
+        await col.updateOne(
+          { _id: oid },
           { $set: { 'seatMatrix.$[row].$[cell].status': 'available' } },
-          { arrayFilters: [{ 'row.row': locked.row }, { 'cell.col': locked.col }] }
+          {
+            arrayFilters: [
+              { 'row.row': locked.row },
+              { 'cell.col': locked.col },
+            ],
+          }
         );
       }
-      throw lockError;
+      throw lockErr;
     }
 
     const calculated = seats.length * showtime.price + BOOKING_FEE;
     const booking = await Booking.create({
       userId,
-      showtimeId,
+      showtimeId: oid,
       seats,
       totalAmount: totalAmount || calculated,
       status: 'active',
@@ -76,7 +110,7 @@ exports.createBooking = async (req, res) => {
 
     res.status(201).json({ success: true, data: booking });
   } catch (err) {
-    console.error('createBooking error:', err);
+    console.error('createBooking error:', err.message);
     res.status(500).json({ success: false, message: err.message });
   }
 };
@@ -84,10 +118,9 @@ exports.createBooking = async (req, res) => {
 exports.getBookings = async (req, res) => {
   try {
     const { userId = 'guest' } = req.query;
-    const bookings = await Booking.find({ userId }).populate({
-      path: 'showtimeId',
-      populate: { path: 'theatreId' },
-    }).sort({ createdAt: -1 });
+    const bookings = await Booking.find({ userId })
+      .populate({ path: 'showtimeId', populate: { path: 'theatreId' } })
+      .sort({ createdAt: -1 });
     res.json({ success: true, data: bookings });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
@@ -115,12 +148,20 @@ exports.cancelBooking = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Booking already cancelled' });
     }
 
-    // Free seats
+    const col = getCol();
+    const oid = booking.showtimeId;
+
+    // Free all seats using native driver (same reason — avoids Mongoose 2D cast bug)
     for (const seat of booking.seats) {
-      await Showtime.updateOne(
-        { _id: booking.showtimeId },
+      await col.updateOne(
+        { _id: oid },
         { $set: { 'seatMatrix.$[row].$[cell].status': 'available' } },
-        { arrayFilters: [{ 'row.row': seat.row }, { 'cell.col': seat.col }] }
+        {
+          arrayFilters: [
+            { 'row.row': seat.row },
+            { 'cell.col': seat.col },
+          ],
+        }
       );
     }
 
@@ -128,7 +169,7 @@ exports.cancelBooking = async (req, res) => {
     await booking.save();
     res.json({ success: true, data: booking });
   } catch (err) {
-    console.error('cancelBooking error:', err);
+    console.error('cancelBooking error:', err.message);
     res.status(500).json({ success: false, message: err.message });
   }
 };

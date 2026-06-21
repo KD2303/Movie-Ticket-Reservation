@@ -12,7 +12,8 @@ export default function Payment() {
   const { selectedMovie } = useSelector((s) => s.movies);
 
   useEffect(() => {
-    if (!selectedShowtime?._id) {
+    // Strict guard: _id must be a non-empty string (not a corrupt rehydration value like "F")
+    if (!selectedShowtime?._id || typeof selectedShowtime._id !== 'string') {
       navigate('/');
     }
   }, [selectedShowtime, navigate]);
