@@ -18,8 +18,8 @@ function getDates(count = 7) {
   const dates = [];
   for (let i = 0; i < count; i++) {
     const d = new Date();
-    d.setDate(d.getDate() + i);
-    d.setHours(0, 0, 0, 0);
+    d.setUTCHours(0, 0, 0, 0);
+    d.setUTCDate(d.getUTCDate() + i);
     dates.push(d);
   }
   return dates;
@@ -46,12 +46,28 @@ const theatresData = [
   },
 ];
 
-// Real TMDB movie IDs
+// Real TMDB movie IDs — 20 upcoming/recent 2026 releases
 const tmdbMovies = [
-  { id: 1022789, title: 'Inside Out 2' },
-  { id: 653346, title: 'Kingdom of the Planet of the Apes' },
-  { id: 519182, title: 'Despicable Me 4' },
-  { id: 748783, title: 'The Garfield Movie' },
+  { id: 1339713, title: 'Obsession' },
+  { id: 936075,  title: 'Michael' },
+  { id: 931285,  title: 'Mortal Kombat II' },
+  { id: 1239134, title: 'Bhooth Bangla' },
+  { id: 1367220, title: 'Karuppu' },
+  { id: 1084244, title: 'Toy Story 5' },
+  { id: 1057265, title: 'Peddi' },
+  { id: 1275779, title: 'Disclosure Day' },
+  { id: 1308553, title: 'Hai Jawani Toh Ishq Hona Hai' },
+  { id: 1228710, title: 'The Mandalorian and Grogu' },
+  { id: 1477317, title: 'Your Fault: London' },
+  { id: 1280738, title: 'The Furious' },
+  { id: 1304313, title: "Lee Cronin's The Mummy" },
+  { id: 1431068, title: 'Main Vaapas Aaunga' },
+  { id: 1392469, title: 'Cocktail 2' },
+  { id: 1122573, title: 'In the Grey' },
+  { id: 1582770, title: 'Dhurandhar: The Revenge' },
+  { id: 1083381, title: 'Backrooms' },
+  { id: 1127384, title: 'Deep Water' },
+  { id: 454639,  title: 'Masters of the Universe' },
 ];
 
 const times = ['10:00', '13:30', '18:00', '21:30'];

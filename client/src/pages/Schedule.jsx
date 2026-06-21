@@ -38,12 +38,38 @@ export default function Schedule() {
     }
   }, [selectedTheatre]);
 
+  // Redirect to home if no movie is selected after rehydration
+  useEffect(() => {
+    if (!selectedMovie) {
+      const timer = setTimeout(() => {
+        navigate('/');
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [selectedMovie, navigate]);
+
+  // Auto-select first available format for the selected theatre if current format is unavailable
+  useEffect(() => {
+    if (localTheatre && showtimes.length > 0) {
+      const theatreShowtimes = showtimes.filter(
+        (st) => (st.theatreId?._id || st.theatreId) === localTheatre._id
+      );
+      if (theatreShowtimes.length > 0) {
+        const hasCurrentFormat = theatreShowtimes.some((st) => st.format === selectedFormat);
+        if (!hasCurrentFormat) {
+          dispatch(setSelectedFormat(theatreShowtimes[0].format));
+        }
+      }
+    }
+  }, [localTheatre, showtimes, selectedFormat, dispatch]);
+
   const activeDate = dates[activeDateIdx];
   // Use local date string (not toISOString which converts to UTC and can shift the day)
   const isoDate = `${activeDate.getFullYear()}-${String(activeDate.getMonth() + 1).padStart(2, '0')}-${String(activeDate.getDate()).padStart(2, '0')}`;
 
   useEffect(() => {
     if (!selectedMovie) return;
+    console.log('fetching showtimes for', selectedMovie?.id, isoDate);
     setLoading(true);
     fetchShowtimes(selectedMovie.id, isoDate)
       .then((r) => {
@@ -52,6 +78,19 @@ export default function Schedule() {
       .catch(() => setShowtimes([]))
       .finally(() => setLoading(false));
   }, [selectedMovie, isoDate]);
+
+  if (!selectedMovie) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-white px-6 text-center">
+        <p className="text-5xl mb-4">🎬</p>
+        <p className="text-gray-900 font-extrabold text-lg mb-1">No movie selected</p>
+        <p className="text-gray-400 text-xs mb-6">Please go back and pick a movie first.</p>
+        <button onClick={() => navigate('/')} className="gradient-purple px-6 py-3 rounded-2xl text-white font-bold text-xs">
+          Browse Movies
+        </button>
+      </div>
+    );
+  }
 
   // Group showtimes by theatre
   const theatresMap = showtimes.reduce((acc, st) => {

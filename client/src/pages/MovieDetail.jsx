@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { loadMovieById, setSelectedFormat } from '../store/movieSlice';
+import { loadMovieById, setSelectedFormat, setSelectedMovie } from '../store/movieSlice';
 
 const FORMATS = ['2D', '3D', 'IMAX'];
 
@@ -142,7 +142,11 @@ export default function MovieDetail() {
       <div className="fixed bottom-16 left-1/2 -translate-x-1/2 w-full max-w-[390px] p-4 bg-white border-t border-gray-100">
         <button
           id="book-now-cta"
-          onClick={() => navigate('/schedule')}
+          onClick={() => {
+            dispatch(setSelectedMovie(m));
+            dispatch(setSelectedFormat(selectedFormat));
+            navigate('/schedule');
+          }}
           className="w-full gradient-purple py-3.5 rounded-2xl text-white font-extrabold text-sm shadow-[0_4px_16px_rgba(95,51,225,0.25)] transition-transform active:scale-95"
         >
           Get Tickets

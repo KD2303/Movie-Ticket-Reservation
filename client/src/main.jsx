@@ -7,6 +7,12 @@ import { store, persistor } from './store/index';
 import App from './App';
 import './index.css';
 
+// Purge old local storage once on first deploy of new version
+if (!localStorage.getItem('purged_v1')) {
+  persistor.purge();
+  localStorage.setItem('purged_v1', 'true');
+}
+
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <Provider store={store}>

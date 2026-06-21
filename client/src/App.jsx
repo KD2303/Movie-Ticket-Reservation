@@ -7,6 +7,7 @@ import SeatSelection from './pages/SeatSelection';
 import BookingSummary from './pages/BookingSummary';
 import Payment from './pages/Payment';
 import MyBookings from './pages/MyBookings';
+import BookingDetail from './pages/BookingDetail';
 import Search from './pages/Search';
 
 export default function App() {
@@ -21,6 +22,7 @@ export default function App() {
         <Route path="/summary" element={<BookingSummary />} />
         <Route path="/payment" element={<Payment />} />
         <Route path="/bookings" element={<MyBookings />} />
+        <Route path="/bookings/:id" element={<BookingDetail />} />
         <Route path="/profile" element={<ProfileStub />} />
       </Routes>
       <BottomNav />

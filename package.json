@@ -7,7 +7,7 @@
     "node": ">=18.0.0"
   },
   "scripts": {
-    "start": "NODE_ENV=production node server/server.js",
+    "start": "cross-env NODE_ENV=production node server/server.js",
     "dev": "nodemon server/server.js",
     "seed": "node server/seed/seedData.js",
     "build": "npm install --prefix client && npm run build --prefix client",
@@ -27,6 +27,7 @@
   },
   "devDependencies": {
     "concurrently": "^10.0.3",
+    "cross-env": "^10.1.0",
     "nodemon": "^3.1.14"
   }
 }

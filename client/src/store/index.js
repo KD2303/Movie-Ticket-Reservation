@@ -17,8 +17,14 @@ const bookingPersistConfig = {
   whitelist: ['selectedDate', 'selectedTime', 'selectedTheatre', 'selectedShowtime', 'selectedSeats', 'seatPrice', 'totalPrice'],
 };
 
+const moviePersistConfig = {
+  key: 'movies',
+  storage,
+  whitelist: ['selectedMovie', 'selectedFormat'],
+};
+
 const rootReducer = combineReducers({
-  movies: movieReducer,
+  movies: persistReducer(moviePersistConfig, movieReducer),
   booking: persistReducer(bookingPersistConfig, bookingReducer),
   history: historyReducer,
 });

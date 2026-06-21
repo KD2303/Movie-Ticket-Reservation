@@ -6,6 +6,7 @@ const cache = new NodeCache({ stdTTL: 300 }); // 5-min TTL
 const tmdb = axios.create({
   baseURL: process.env.TMDB_BASE_URL || 'https://api.themoviedb.org/3',
   params: { api_key: process.env.TMDB_API_KEY, language: 'en-US' },
+  headers: { 'Accept-Encoding': 'identity' },
   timeout: 10000,
 });
 

@@ -7,8 +7,8 @@ exports.getShowtimes = async (req, res) => {
     if (tmdbMovieId) filter.tmdbMovieId = Number(tmdbMovieId);
     if (date) {
       const [year, month, day] = date.split('-').map(Number);
-      const d = new Date(year, month - 1, day, 0, 0, 0, 0);
-      const next = new Date(year, month - 1, day + 1, 0, 0, 0, 0);
+      const d = new Date(Date.UTC(year, month - 1, day));
+      const next = new Date(Date.UTC(year, month - 1, day + 1));
       filter.date = { $gte: d, $lt: next };
     }
     const showtimes = await Showtime.find(filter).populate('theatreId');

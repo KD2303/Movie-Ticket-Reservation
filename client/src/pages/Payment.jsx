@@ -30,15 +30,16 @@ export default function Payment() {
     setLoading(true);
     setError('');
     try {
-      await createBooking({
+      const res = await createBooking({
         userId: 'guest',
         showtimeId: selectedShowtime._id,
         seats: selectedSeats,
         totalAmount: totalPrice,
       });
+      const bookingId = res.data.data._id;
       setSuccess(true);
       dispatch(clearBooking());
-      setTimeout(() => navigate('/bookings'), 2000);
+      setTimeout(() => navigate(`/bookings/${bookingId}`), 2000);
     } catch (err) {
       setError(err.response?.data?.message || 'Payment failed. Please try again.');
     } finally {
@@ -57,7 +58,7 @@ export default function Payment() {
           </div>
           <h2 className="text-gray-900 font-extrabold text-xl mb-1">Payment Successful!</h2>
           <p className="text-gray-400 text-xs mb-3">Your tickets have been reserved</p>
-          <p className="text-purple text-xs font-bold animate-pulse">Redirecting to My Tickets…</p>
+          <p className="text-purple text-xs font-bold animate-pulse">Redirecting to Ticket Details…</p>
         </div>
       </div>
     );
