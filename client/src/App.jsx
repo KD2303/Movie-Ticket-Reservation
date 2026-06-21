@@ -9,6 +9,9 @@ import Payment from './pages/Payment';
 import MyBookings from './pages/MyBookings';
 import BookingDetail from './pages/BookingDetail';
 import Search from './pages/Search';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import Profile from './pages/Profile';
 
 export default function App() {
   return (
@@ -23,27 +26,11 @@ export default function App() {
         <Route path="/payment" element={<Payment />} />
         <Route path="/bookings" element={<MyBookings />} />
         <Route path="/bookings/:id" element={<BookingDetail />} />
-        <Route path="/profile" element={<ProfileStub />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
       </Routes>
       <BottomNav />
-    </div>
-  );
-}
-
-function ProfileStub() {
-  return (
-    <div className="flex flex-col items-center justify-center h-screen pb-24 text-center px-6 bg-white">
-      <div className="w-24 h-24 rounded-full gradient-purple flex items-center justify-center mb-6 mx-auto shadow-lg shadow-purple/20">
-        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-          <circle cx="12" cy="8" r="4" />
-          <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" strokeLinecap="round" />
-        </svg>
-      </div>
-      <h2 className="text-gray-900 font-black text-xl mb-1">Guest User</h2>
-      <p className="text-gray-400 text-sm">Sign in to sync your bookings across devices</p>
-      <button className="mt-6 gradient-purple px-6 py-3 rounded-2xl text-white font-bold text-sm">
-        Sign In (Coming Soon)
-      </button>
     </div>
   );
 }

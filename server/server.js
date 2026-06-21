@@ -55,6 +55,7 @@ app.use(cors({
 app.use(express.json());
 
 // API Routes
+app.use('/api/auth', require('./routes/auth'));
 app.use('/api/movies', require('./routes/movies'));
 app.use('/api/theatres', require('./routes/theatres'));
 app.use('/api/showtimes', require('./routes/showtimes'));
@@ -80,7 +81,12 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT} [${process.env.NODE_ENV || 'development'}]`));
 
 // Connect MongoDB
+const { seedDemoUser } = require('./controllers/authController');
 mongoose
   .connect(process.env.MONGODB_URI)
-  .then(() => console.log('✅ MongoDB connected'))
+  .then(() => {
+    console.log('✅ MongoDB connected');
+    seedDemoUser();
+  })
   .catch((err) => console.error('⚠️  MongoDB unavailable:', err.message));
+

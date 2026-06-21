@@ -3,12 +3,19 @@ import { persistStore, persistReducer, FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, 
 import movieReducer from './movieSlice';
 import bookingReducer from './bookingSlice';
 import historyReducer from './historySlice';
+import authReducer from './authSlice';
 
 // Inline localStorage adapter — avoids Vite ESM resolution issues with redux-persist/lib/storage
 const storage = {
   getItem: (key) => Promise.resolve(window.localStorage.getItem(key)),
   setItem: (key, value) => Promise.resolve(window.localStorage.setItem(key, value)),
   removeItem: (key) => Promise.resolve(window.localStorage.removeItem(key)),
+};
+
+const authPersistConfig = {
+  key: 'auth',
+  storage,
+  whitelist: ['user', 'token', 'isLoggedIn'],
 };
 
 const bookingPersistConfig = {
@@ -29,6 +36,7 @@ const rootReducer = combineReducers({
   movies: persistReducer(moviePersistConfig, movieReducer),
   booking: persistReducer(bookingPersistConfig, bookingReducer),
   history: historyReducer,
+  auth: persistReducer(authPersistConfig, authReducer),
 });
 
 export const store = configureStore({

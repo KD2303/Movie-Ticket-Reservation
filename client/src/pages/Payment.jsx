@@ -10,6 +10,7 @@ export default function Payment() {
   const dispatch = useDispatch();
   const { selectedSeats, selectedShowtime, totalPrice, seatPrice } = useSelector((s) => s.booking);
   const { selectedMovie } = useSelector((s) => s.movies);
+  const { user } = useSelector((s) => s.auth);
 
   useEffect(() => {
     // Strict guard: _id must be a non-empty string (not a corrupt rehydration value like "F")
@@ -32,7 +33,6 @@ export default function Payment() {
     setError('');
     try {
       const res = await createBooking({
-        userId: 'guest',
         showtimeId: selectedShowtime._id,
         seats: selectedSeats,
         totalAmount: totalPrice,

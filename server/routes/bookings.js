@@ -6,10 +6,12 @@ const {
   getBookingById,
   cancelBooking,
 } = require('../controllers/bookingController');
+const auth = require('../middleware/auth');
 
-router.post('/', createBooking);
-router.get('/', getBookings);
-router.get('/:id', getBookingById);
-router.patch('/:id/cancel', cancelBooking);
+router.post('/', auth, createBooking);
+router.get('/', auth, getBookings);
+router.get('/:id', auth, getBookingById);
+router.patch('/:id/cancel', auth, cancelBooking);
 
 module.exports = router;
+

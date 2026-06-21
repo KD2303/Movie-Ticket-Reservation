@@ -1,15 +1,22 @@
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import { loadBookings } from '../store/historySlice';
 import TicketCard from '../components/TicketCard';
 
 export default function MyBookings() {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { bookings, loading, error } = useSelector((s) => s.history);
+  const { isLoggedIn } = useSelector((s) => s.auth);
 
   useEffect(() => {
-    dispatch(loadBookings('guest'));
-  }, [dispatch]);
+    if (!isLoggedIn) {
+      navigate('/login?redirect=/bookings');
+      return;
+    }
+    dispatch(loadBookings());
+  }, [dispatch, isLoggedIn, navigate]);
 
   return (
     <div className="pb-24 bg-white min-h-screen">
@@ -32,7 +39,7 @@ export default function MyBookings() {
           <div className="text-center py-12">
             <p className="text-4xl mb-3">⚠️</p>
             <p className="text-gray-400 text-xs font-semibold">{error}</p>
-            <button onClick={() => dispatch(loadBookings('guest'))} className="mt-4 text-purple text-xs font-bold underline">
+            <button onClick={() => dispatch(loadBookings())} className="mt-4 text-purple text-xs font-bold underline">
               Retry
             </button>
           </div>

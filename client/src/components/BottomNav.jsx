@@ -11,7 +11,7 @@ export default function BottomNav() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const HIDDEN_PATHS = ['/schedule', '/seats', '/summary', '/payment'];
+  const HIDDEN_PATHS = ['/schedule', '/seats', '/summary', '/payment', '/login', '/register'];
   if (HIDDEN_PATHS.includes(location.pathname)) {
     return null;
   }

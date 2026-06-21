@@ -7,12 +7,17 @@ export default function BookingSummary() {
   const navigate = useNavigate();
   const { selectedSeats, selectedDate, selectedTime, selectedTheatre, selectedShowtime, seatPrice, totalPrice } = useSelector((s) => s.booking);
   const { selectedMovie } = useSelector((s) => s.movies);
+  const { isLoggedIn } = useSelector((s) => s.auth);
 
   useEffect(() => {
+    if (!isLoggedIn) {
+      navigate('/login?redirect=/summary');
+      return;
+    }
     if (!selectedShowtime?._id) {
       navigate('/');
     }
-  }, [selectedShowtime, navigate]);
+  }, [selectedShowtime, navigate, isLoggedIn]);
 
   const baseTotal = selectedSeats.length * seatPrice;
 

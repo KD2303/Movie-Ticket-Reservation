@@ -16,6 +16,7 @@ export default function SeatSelection() {
   const navigate = useNavigate();
   const { selectedShowtime, selectedSeats, selectedTheatre } = useSelector((s) => s.booking);
   const { selectedMovie } = useSelector((s) => s.movies);
+  const { isLoggedIn } = useSelector((s) => s.auth);
 
   const [seatMatrix, setSeatMatrix] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -99,7 +100,7 @@ export default function SeatSelection() {
         <button
           id="proceed-to-summary"
           disabled={!canProceed}
-          onClick={() => navigate('/summary')}
+          onClick={() => navigate(isLoggedIn ? '/summary' : '/login?redirect=/summary')}
           className={`w-full py-3.5 rounded-2xl font-extrabold text-sm transition-all text-center ${
             canProceed
               ? 'gradient-purple text-white shadow-[0_4px_16px_rgba(95,51,225,0.25)]'

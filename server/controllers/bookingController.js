@@ -17,7 +17,8 @@ function getCol() {
 }
 
 exports.createBooking = async (req, res) => {
-  const { userId = 'guest', showtimeId, seats, totalAmount } = req.body;
+  const { showtimeId, seats, totalAmount } = req.body;
+  const userId = req.user.id;
   if (!showtimeId || !seats || seats.length === 0) {
     return res.status(400).json({ success: false, message: 'showtimeId and seats are required' });
   }
@@ -117,7 +118,7 @@ exports.createBooking = async (req, res) => {
 
 exports.getBookings = async (req, res) => {
   try {
-    const { userId = 'guest' } = req.query;
+    const userId = req.user.id;
     const bookings = await Booking.find({ userId })
       .populate({ path: 'showtimeId', populate: { path: 'theatreId' } })
       .sort({ createdAt: -1 });

@@ -1,8 +1,8 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { fetchBookings, cancelBooking as cancelBookingApi } from '../services/api';
 
-export const loadBookings = createAsyncThunk('history/loadBookings', async (userId = 'guest') => {
-  const res = await fetchBookings(userId);
+export const loadBookings = createAsyncThunk('history/loadBookings', async () => {
+  const res = await fetchBookings();
   return res.data.data;
 });
 
